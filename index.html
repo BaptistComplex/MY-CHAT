@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>채팅창 생성기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang&family=Gowun+Dodum&family=Nanum+Myeongjo&family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:Pretendard;src:url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/woff2/PretendardVariable.woff2') format('woff2');font-weight:100 900;font-display:swap}
+</style>
+<style>
+:root{font-family:system-ui,-apple-system,"Noto Sans KR",sans-serif;color:#202124;background:#f4f5f7}
+*{box-sizing:border-box}
+body{margin:0;padding:24px;min-width:320px}
+h1{font-size:23px;margin:0 0 7px}
+.sub{color:#68707b;font-size:13px;margin:0 0 22px}
+.app{max-width:1240px;margin:auto;display:grid;grid-template-columns:minmax(340px,430px) minmax(0,1fr);gap:24px;align-items:start}
+.panel,.preview-panel{min-width:0;background:#fff;border:1px solid #e4e7eb;border-radius:16px;padding:22px;box-shadow:0 4px 18px #2021240a}
+.panel h2{font-size:16px;margin:0 0 14px}
+.section{padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid #edf0f2}
+.section:last-child{border:0;margin:0;padding:0}
+label{display:block;font-size:12px;font-weight:650;color:#555e69;margin:11px 0 6px}
+input[type=text],textarea,select{width:100%;border:1px solid #d9dee5;border-radius:9px;padding:10px 11px;font:inherit;font-size:13px;background:#fff}
+textarea{min-height:105px;resize:vertical;line-height:1.55}
+input[type=color]{
+ width:48px;height:36px;min-width:48px;flex:0 0 48px;
+ padding:3px;border:1px solid #d5dae1;border-radius:8px;
+ background:#fff;vertical-align:middle;cursor:pointer;
+ -webkit-appearance:none;appearance:none;overflow:hidden;
+}
+input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+input[type=color]::-webkit-color-swatch{border:0;border-radius:5px}
+input[type=color]::-moz-color-swatch{border:0;border-radius:5px}
+.options{min-width:0}
+.options input[type=color]{display:block;box-sizing:border-box}
+input[type=file]{width:100%;font-size:12px}
+.hint{font-size:11px;color:#7b8490;margin:5px 0 0;line-height:1.45}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{border:0;border-radius:10px;padding:11px 15px;font-weight:700;cursor:pointer}
+.primary{background:#202124;color:white;width:100%;margin-top:14px}
+.secondary{background:#eef0f3;color:#30343a}
+.preview-panel{position:sticky;top:16px;min-height:400px}
+.preview-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}
+.preview-head h2{font-size:16px;margin:0}
+.preview-wrap{display:flex;justify-content:center;align-items:flex-start;background-color:#eceff2;background-image:linear-gradient(45deg,#dfe3e8 25%,transparent 25%),linear-gradient(-45deg,#dfe3e8 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#dfe3e8 75%),linear-gradient(-45deg,transparent 75%,#dfe3e8 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0;border-radius:13px;padding:18px;overflow:auto;max-height:78vh}
+canvas{display:block;flex:0 1 auto;width:min(100%,390px);height:auto;max-height:none;object-fit:contain;box-shadow:0 6px 22px #0002;background:transparent}
+.options{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.message-row{display:grid;grid-template-columns:20px 64px 86px minmax(0,1fr) 36px;gap:8px;align-items:start;margin-top:9px;min-width:0}.drag-handle{height:38px;padding:0;background:#eef0f3;color:#68707b;font-size:17px;cursor:grab;touch-action:none}.message-row.dragging{opacity:.4}.message-row.drag-over{outline:2px dashed #8b95a3;outline-offset:3px;border-radius:8px}
+.message-row>*{min-width:0}
+.section input[type=file]{max-width:100%}
+.message-row select{padding:9px 5px}
+.message-row textarea{min-height:64px}
+.remove-message{height:38px;padding:0;background:#f0f1f3;color:#555;font-size:18px}
+.message-index{font-size:11px;color:#7b8490;margin:3px 0 0 2px}
+.options label{display:inline-flex;align-items:center;gap:6px;margin:0;font-weight:500}
+input[type=checkbox]{accent-color:#202124}
+@media(max-width:800px){body{padding:12px}.app{grid-template-columns:minmax(0,1fr);gap:14px}.preview-panel{position:static;grid-row:1;padding:14px}.panel{padding:16px}.preview-wrap{padding:10px;max-height:68vh}canvas{width:min(100%,320px)}}
+@media(min-width:801px) and (max-width:1050px){.app{grid-template-columns:minmax(310px,380px) minmax(0,1fr);gap:14px}.panel,.preview-panel{padding:16px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <section class="panel">
+    <h1>채팅창 생성기</h1>
+    <p class="sub">대화를 입력하고 PNG로 저장하세요.</p>
+    <div class="section">
+      <h2>참여자 A</h2>
+      <label>이름</label><input id="leftName" type="text" value="상대방">
+      <label>프로필 사진</label><input id="leftAvatar" type="file" accept="image/*">
+    </div>
+    <div class="section">
+      <h2>참여자 B (나)</h2>
+      <label>오른쪽 말풍선 색상</label>
+      <div class="options"><input id="rightBubbleColor" type="color" value="#fee500"><span class="hint">이름과 프로필 사진은 표시하지 않습니다.</span></div>
+    </div>
+    <div class="section">
+      <h2>채팅 메시지</h2>
+      <p class="hint">메시지 왼쪽의 손잡이를 드래그해 순서를 바꿀 수 있습니다.</p>
+      <div id="messageList"></div>
+      <button class="secondary" id="addMessage" type="button" style="width:100%;margin-top:10px">＋ 메시지 추가</button>
+    </div>
+    <div class="section">
+      <h2>채팅방 배경</h2>
+      <label>배경 색상</label><div class="options"><input id="bgColor" type="color" value="#bacee0"><span class="hint">배경 이미지가 없을 때 적용됩니다.</span></div>
+      <label>배경 이미지</label><input id="bgImage" type="file" accept="image/*">
+      <div class="options" style="margin-top:10px">
+        <label><input id="transparent" type="checkbox"> 배경을 투명하게 저장</label>
+      </div>
+      <p class="hint">배경 색상과 배경 이미지를 제외하고 말풍선만 저장합니다.</p>
+    </div>
+    <div class="section">
+      <h2>화면 설정</h2>
+      <div class="two">
+        <div><label>화면 비율</label><select id="ratio"><option value="1080,1920">9:16 (1080×1920)</option><option value="1440,3120">9:19.5 (1440×3120)</option><option value="1640,2360">3:4 (1640×2360)</option></select></div>
+        <div><label>폰트</label><select id="fontFamily">
+          <option value="Pretendard" selected>프리텐다드</option>
+          <option value="Noto Sans KR">본고딕 (Noto Sans KR)</option>
+          <option value="Noto Serif KR">본명조 (Noto Serif KR)</option>
+          <option value="Nanum Myeongjo">나눔명조</option>
+          <option value="Gowun Batang">고운바탕</option>
+          <option value="Gowun Dodum">고운돋움</option>
+          <option value="serif">기본 명조</option>
+          <option value="sans-serif">기본 고딕</option>
+        </select></div>
+      </div>
+      <label for="fontSize">글자 크기: <span id="fontSizeValue">16</span>pt</label>
+      <input id="fontSize" type="range" min="13" max="19" step="1" value="16" style="width:100%">
+      <div class="options" style="justify-content:space-between"><span class="hint">13pt</span><span class="hint">19pt</span></div>
+      <label>상단 채팅방 이름</label><input id="roomName" type="text" value="채팅">
+    </div>
+    <button class="primary" id="download">PNG 이미지 다운로드</button>
+  </section>
+  <section class="preview-panel">
+    <div class="preview-head"><h2>미리 보기</h2><button class="secondary" id="refresh">새로 고침</button></div>
+    <div class="preview-wrap"><canvas id="canvas" width="1080" height="1920"></canvas></div>
+    <p class="hint">미리 보기는 실제 저장 이미지와 같은 비율로 표시됩니다.</p>
+  </section>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const canvas=$('canvas'),ctx=canvas.getContext('2d');
+let leftAvatar=null,bgImage=null;
+let messages=[
+ {sender:'A',text:'안녕하세요!'},
+ {sender:'A',text:'오늘 뭐 하세요?'},
+ {sender:'B',text:'네, 집에서 쉬고 있어요.'},
+ {sender:'B',text:'무슨 일이세요?'}
+];
+function loadFile(file,cb){if(!file){cb(null);return}const url=URL.createObjectURL(file);const img=new Image();img.onload=()=>{cb(img);URL.revokeObjectURL(url)};img.onerror=()=>{cb(null);URL.revokeObjectURL(url)};img.src=url}
+$('leftAvatar').addEventListener('change',e=>loadFile(e.target.files[0],v=>{leftAvatar=v;draw()}));
+$('bgImage').addEventListener('change',e=>loadFile(e.target.files[0],v=>{bgImage=v;draw()}));
+function renderMessageInputs(){
+ const list=$('messageList');list.innerHTML='';
+ messages.forEach((m,i)=>{
+  if(!m.avatar)m.avatar='off';
+  const row=document.createElement('div');row.className='message-row';
+  const handle=document.createElement('button');handle.type='button';handle.draggable=true;handle.className='drag-handle';handle.textContent='⠿';handle.title='드래그하여 메시지 순서 변경';handle.setAttribute('aria-label',`${i+1}번 메시지 순서 변경`);
+  const select=document.createElement('select');select.setAttribute('aria-label',`${i+1}번 메시지 발신자`);
+  select.innerHTML='<option value="A">A</option><option value="B">B</option>';select.value=m.sender;
+  select.addEventListener('change',()=>{messages[i].sender=select.value;renderMessageInputs();draw()});
+  const avatarSelect=document.createElement('select');avatarSelect.setAttribute('aria-label',`${i+1}번 메시지 프로필 사진 표시`);
+  avatarSelect.innerHTML='<option value="off">프사 OFF</option><option value="on">프사 ON</option>';
+  avatarSelect.value=m.avatar;avatarSelect.disabled=m.sender!=='A';
+  avatarSelect.addEventListener('change',()=>{messages[i].avatar=avatarSelect.value;draw()});
+  const area=document.createElement('textarea');area.placeholder=`${i+1}번 메시지`;area.value=m.text;area.addEventListener('input',()=>{messages[i].text=area.value;draw()});
+  const remove=document.createElement('button');remove.type='button';remove.className='remove-message';remove.textContent='×';remove.title='메시지 삭제';remove.addEventListener('click',()=>{messages.splice(i,1);renderMessageInputs();draw()});
+  row.append(handle,select,avatarSelect,area,remove);list.appendChild(row);
+  row.addEventListener('dragstart',e=>{
+   if(e.target!==handle){e.preventDefault();return}
+   row.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(i));
+  });
+  row.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';row.classList.add('drag-over')});
+  row.addEventListener('dragleave',()=>row.classList.remove('drag-over'));
+  row.addEventListener('drop',e=>{
+   e.preventDefault();row.classList.remove('drag-over');
+   const from=Number(e.dataTransfer.getData('text/plain'));
+   const to=i;
+   if(Number.isInteger(from)&&from>=0&&from<messages.length&&from!==to){
+    const moved=messages.splice(from,1)[0];messages.splice(to,0,moved);renderMessageInputs();draw();
+   }
+  });
+  row.addEventListener('dragend',()=>{
+   list.querySelectorAll('.message-row').forEach(el=>el.classList.remove('dragging','drag-over'));
+  });
+  const idx=document.createElement('div');idx.className='message-index';idx.textContent=`메시지 ${i+1}`;list.appendChild(idx);
+ });
+}
+$('addMessage').addEventListener('click',()=>{messages.push({sender:messages.length?messages[messages.length-1].sender:'A',text:'',avatar:'off'});renderMessageInputs();draw();const areas=$('messageList').querySelectorAll('textarea');areas[areas.length-1]?.focus()});
+['leftName','bgColor','rightBubbleColor','transparent','ratio','fontFamily','fontSize','roomName'].forEach(id=>$(id).addEventListener('input',()=>{if(id==='fontSize')$('fontSizeValue').textContent=$('fontSize').value;draw()}));
+$('refresh').addEventListener('click',draw);
+function roundRect(c,x,y,w,h,r,fill){c.beginPath();c.roundRect(x,y,w,h,r);c.fillStyle=fill;c.fill()}
+function imageCover(img,x,y,w,h){const s=Math.max(w/img.width,h/img.height),sw=w/s,sh=h/s,sx=(img.width-sw)/2,sy=(img.height-sh)/2;ctx.save();ctx.beginPath();ctx.arc(x+w/2,y+h/2,w/2,0,Math.PI*2);ctx.clip();ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h);ctx.restore()}
+function wrapLines(text,maxWidth,font){ctx.font=font;const out=[];for(const paragraph of text.split('\n')){let line='';for(const ch of paragraph){if(ctx.measureText(line+ch).width>maxWidth&&line){out.push(line);line=ch}else line+=ch}out.push(line)}return out}
+function draw(){
+ const [W,H]=$('ratio').value.split(',').map(Number);canvas.width=W;canvas.height=H;
+ const scale=W/1080,chatZoom=1.30,fs=Number($('fontSize').value)*scale*(96/72)*chatZoom;
+ const family=$('fontFamily').value;
+ const fontStack=family==='serif'?'serif':family==='sans-serif'?'sans-serif':`"${family}", sans-serif`;
+ ctx.clearRect(0,0,W,H);
+ if(!$('transparent').checked){if(bgImage){const s=Math.max(W/bgImage.width,H/bgImage.height);ctx.drawImage(bgImage,(W-bgImage.width*s)/2,(H-bgImage.height*s)/2,bgImage.width*s,bgImage.height*s)}else{ctx.fillStyle=$('bgColor').value;ctx.fillRect(0,0,W,H)}}
+ ctx.fillStyle='rgba(255,255,255,.88)';ctx.fillRect(0,0,W,104*scale);
+ ctx.fillStyle='#202124';ctx.font=`700 ${30*scale}px ${fontStack}`;ctx.textAlign='center';ctx.fillText($('roomName').value||'채팅',W/2,65*scale);
+ ctx.strokeStyle='rgba(0,0,0,.08)';ctx.beginPath();ctx.moveTo(0,104*scale);ctx.lineTo(W,104*scale);ctx.stroke();
+ let y=145*scale;
+ const pad=22*scale*chatZoom,avatar=66*scale*chatZoom,maxBubble=W*.50,lh=fs*1.48;
+ const visibleMessages=messages.filter(m=>m.text.trim());
+ visibleMessages.forEach((item,index)=>{
+   const isRight=item.sender==='B';
+   const isNewSender=index===0 || visibleMessages[index-1].sender!==item.sender;
+   // A는 새 발신자이거나 프사 ON인 메시지에 말풍선 꼬리를 표시합니다.
+   const showTail=isNewSender||(!isRight&&item.avatar==='on');
+   const showAIdentity=!isRight&&(isNewSender||item.avatar==='on');
+   const name=$('leftName').value;
+   const avatarImg=leftAvatar;
+   const font=`${fs}px ${fontStack}`;
+   const lines=wrapLines(item.text,maxBubble-2*pad,font);
+   const textW=Math.max(...lines.map(t=>ctx.measureText(t).width),0);
+   const bw=Math.min(maxBubble,textW+pad*2),bh=lines.length*lh+pad*1.25;
+   const ax=42*scale*chatZoom;
+   let bx,by;
+
+   if(isRight){
+     // B(나)는 오른쪽 끝에 말풍선을 배치합니다.
+     bx=W-42*scale*chatZoom-bw;
+     by=y;
+   }else{
+     // A의 첫 메시지에는 사진과 이름을 한 줄에 배치하고,
+     // 말풍선은 그 아래에서 시작합니다. 연속 메시지는 같은 말풍선 시작선에 맞춥니다.
+     bx=ax+avatar+22*scale*chatZoom;
+     if(showAIdentity){
+       const identityY=y;
+       if(avatarImg)imageCover(avatarImg,ax,identityY,avatar,avatar);
+       else{
+         ctx.fillStyle='#e4e7eb';
+         ctx.beginPath();ctx.arc(ax+avatar/2,identityY+avatar/2,avatar/2,0,Math.PI*2);ctx.fill();
+         ctx.fillStyle='#7b8490';ctx.font=`${32*scale*chatZoom}px sans-serif`;ctx.textAlign='center';
+         ctx.fillText('●',ax+avatar/2,identityY+avatar*.67);
+       }
+       const nameFont=`600 ${20*scale*chatZoom}px ${fontStack}`;
+       ctx.font=nameFont;
+       const metrics=ctx.measureText(name||'상대방');
+       const ascent=metrics.actualBoundingBoxAscent||15*scale*chatZoom;
+       ctx.fillStyle='#525b66';ctx.textAlign='left';
+       ctx.fillText(name||'상대방',ax+avatar+16*scale*chatZoom,identityY+ascent);
+       by=identityY+28*scale*chatZoom;
+     }else{
+       by=y;
+     }
+   }
+
+   // 발신자가 바뀌는 첫 메시지에만 말풍선 꼬리를 표시합니다.
+   if(showTail){
+     const tailY=by+14*scale*chatZoom;
+     const tailSize=11*scale*chatZoom;
+     ctx.beginPath();
+if(isRight){
+  ctx.moveTo(bx+bw-10*scale*chatZoom,tailY-10*scale*chatZoom);
+  ctx.lineTo(bx+bw+tailSize,tailY-10*scale*chatZoom);
+  ctx.lineTo(bx+bw-10*scale*chatZoom,tailY+10*scale*chatZoom);
+}else{
+  ctx.moveTo(bx+10*scale*chatZoom,tailY-10*scale*chatZoom);
+  ctx.lineTo(bx-tailSize,tailY-10*scale*chatZoom);
+  ctx.lineTo(bx+10*scale*chatZoom,tailY+10*scale*chatZoom);
+}
+ctx.closePath();
+     ctx.fillStyle=isRight?$('rightBubbleColor').value:'#ffffff';
+     ctx.fill();
+   }
+
+   roundRect(ctx,bx,by,bw,bh,18*scale*chatZoom,isRight?$('rightBubbleColor').value:'#ffffff');
+
+   // 말풍선 안의 텍스트는 왼쪽 정렬, 세로는 중앙에 배치합니다.
+   ctx.fillStyle='#222';ctx.font=font;ctx.textAlign='left';ctx.textBaseline='middle';
+   const lineCenterY=by+bh/2;
+   lines.forEach((line,j)=>{
+     const lineY=lineCenterY+(j-(lines.length-1)/2)*lh;
+     ctx.fillText(line,bx+pad,lineY);
+   });
+   ctx.textBaseline='alphabetic';
+
+   // 다음 메시지는 현재 말풍선의 아래쪽을 기준으로 배치합니다.
+   const nextItem=visibleMessages[index+1];
+   const nextIsSameSender=!!nextItem && nextItem.sender===item.sender;
+   // 연속된 A 메시지 중 프사 ON이 포함되면 간격을 조금 더 넓힙니다.
+   const sameSenderGap=(!isRight&&nextIsSameSender&&(item.avatar==='on'||nextItem.avatar==='on'))?14:8;
+   y=by+bh+(nextIsSameSender?sameSenderGap*scale*chatZoom:30*scale*chatZoom);
+ });
+}
+$('download').addEventListener('click',()=>{draw();canvas.toBlob(blob=>{if(!blob){alert('이미지를 저장하지 못했습니다.');return}const a=document.createElement('a');const url=URL.createObjectURL(blob);a.href=url;a.download='말풍선_채팅이미지.png';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)},'image/png')});
+renderMessageInputs();draw();
+</script>
+</body>
+</html>
